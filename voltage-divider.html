@@ -1,0 +1,195 @@
+<HTML>
+<HEAD>
+	<TITLE>Spannungsteiler Rechner</TITLE>
+	<SCRIPT Language=JavaScript>
+
+	function calculate() {
+	<!--Widerstandswerte leeren-->
+	clear1()
+
+	<!--Definition Widerstandsreihe-->
+	res1 = new Array (.1,.11,.12,.13,.15,.16,.18,.2,.22,.24,.27,.3,.33,.36,.39,.43,.47,.51,.56,.62,.68,.75,.82,.91,1.0,1.1,1.2,1.3,1.5,1.6,1.8,2.0,2.2,2.4,2.7,3.0,3.3,3.6,3.9,4.3,4.7,5.1,5.6,6.2,6.8,7.5,8.2,9.1,10,11,12,13,15,16,18,20,22,24,27,30,33,36,39,43,47,51,56,62,68,75,82,91);
+	res2 = new Array (1.0,1.1,1.2,1.3,1.5,1.6,1.8,2.0,2.2,2.4,2.7,3.0,3.3,3.6,3.9,4.3,4.7,5.1,5.6,6.2,6.8,7.5,8.2,9.1);
+
+	<!--Variablen-->
+	var r_div1 = new Array (100)
+	var r_div2 = new Array (100)
+	var min_diff = 1
+	var decade = 1
+	var seed_decade = 1
+	var i, j, k, l, div, diff, seed, real_div, real_div_2, error, input_voltage, output_voltage, test_ratio
+
+	<!--Formular einlesen-->
+	  input_voltage  = document.theForm.input_voltage.value <!--Einlesen-->
+	  input_voltage  = input_voltage.replace(",",".")<!--Komma zu Punkt wandeln-->
+	  input_voltage  = parseFloat(input_voltage)	 <!--string to Float-->
+
+	  output_voltage  = document.theForm.output_voltage.value <!--Einlesen-->
+ 	  output_voltage = output_voltage.replace(",",".")<!--Komma zu Punkt wandeln-->
+	  output_voltage = parseFloat(output_voltage)	  <!--string to Float-->
+
+	  seed = parseFloat(document.theForm.seed.value)
+
+
+	<!--Fehler abfangen-->
+	  ratio = output_voltage / input_voltage
+	  if (ratio == .5) alert ("W‰hle die Widerst‰nde gleich groﬂ" + '\n' + "um die Spannung zu halbieren:" + '\n' + "R1 = R2");
+	  if (input_voltage / output_voltage <= 1.009) alert ("Spannungsverh‰ltnis zu gering");
+	  if (input_voltage / output_voltage >= 93) alert ("Spannungsverh‰ltnis zu hoch");
+
+	<!--Berechnung Widerstandswerte-->
+	  for (i = 0 ; i < res1.length ; i++) {
+		for (j = 0 ; j < res2.length ; j++) {
+			test_ratio = res2[j] / (res1[i] + res2[j])
+			diff = Math.abs(ratio - test_ratio)
+			if (diff <= min_diff) min_diff = diff
+		}
+	  }
+
+	  k = 0
+	  for (i = 0 ; i < res1.length ; i++) {
+		for (j = 0 ; j < res2.length ; j++) {
+			test_ratio = res2[j] / (res1[i] + res2[j])
+			diff = Math.abs(ratio - test_ratio)
+			if (diff == min_diff) {
+				r_div1[k] = res1[i]
+		 		r_div2[k] = res2[j]
+		  		k = k + 1
+		  	}
+		}
+	  }
+
+	<!--Ausgabe Widerstandswerte-->
+	  if (r_div1[0] > 0) {
+
+		if ((r_div1[0] * seed) < 1000){
+		   document.theForm.c0.value = (r_div1[0] * seed).toFixed(1)
+		   document.theForm.r0.value = (r_div2[0] * seed).toFixed(1)
+		}
+
+		if ((r_div1[0] * seed) > 999){
+			document.theForm.c0.value = (r_div1[0] * seed/1000).toFixed(1) + " k"
+			document.theForm.r0.value = (r_div2[0] * seed/1000).toFixed(1) + " k"
+		}
+
+		if ((r_div1[0] * seed) > 999999){
+			document.theForm.c0.value = (r_div1[0] * seed/1000000).toFixed(1) + " M"
+			document.theForm.r0.value = (r_div2[0] * seed/1000000).toFixed(1) + " M"
+		}
+	  }
+
+	<!--Berechnung Ausgangsspannung und Abweichung-->
+	  real_output = (r_div2[0] / (r_div1[0] + r_div2[0])) * input_voltage
+	  error = (output_voltage - real_output)*1000
+	  real_output = real_output.toFixed(4) + " V  (Abweichung = " + error.toFixed(1) + " mV)"
+
+	<!--Ausgabe Spannungen und Abweichung-->
+	  document.theForm.real_output.value = real_output
+	  document.theForm.vin.value = input_voltage + " V"
+	  document.theForm.error.value = error
+	}
+
+	<!--Funktion Widerstandswerte leeren-->
+	function clear1() {
+	  document.theForm.c0.value = ""
+	  document.theForm.r0.value = ""
+
+	}
+	</SCRIPT>
+</HEAD>
+
+
+<BODY style="padding-left:20px;">
+	<FONT FACE="arial">
+	<div style="background-color:#afafaf; padding:10px;">
+		<FONT SIZE="+4">
+		Spannungsteiler Rechner (E24)
+		</FONT>
+	</div>
+	<br>
+
+	<FORM name=theForm>
+		<TABLE cellSpacing=0 cellPadding=0 border=0 BGCOLOR="#ffffff"><TR><TD><TABLE cellSpacing=0 cellPadding=0 border=0>
+
+	<!--Eingabe-->
+	<tr><td align=right><FONT face=arial><b>Eingangspannung (in V):  &nbsp; &nbsp;</b></font></td><td><input name=input_voltage value="5" style="width:100px; font-size:13pt;"></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align=right><FONT face=arial><b>Ausgangsspannung (in V):  &nbsp; &nbsp;</b></font></td><td><input name=output_voltage value="3.3" style="width:100px; font-size:13pt;"></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align=right><FONT face=arial><b>minimaler Widerstand:  &nbsp; &nbsp;</b></font></td>
+	  <td>
+	  <select name=seed style="width:100px; font-size:13pt;">
+	  <option value="1">1</option>
+	  <option value="10">10</option>
+	  <option value="100">100</option>
+	  <option value="1000">1k</option>
+	  <option selected value="10000">10k</option>
+	  <option value="100000">100k</option>
+	  <option value="1000000">1M</option>
+	  </select>
+	  </td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td><td><input type=button value="berechnen" onclick=calculate()></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
+
+
+	<!--Vin-->
+	<tr>
+		<td>&nbsp;</td>
+		<td>
+			<input name=vin value="Vin" style="background: #ffffff; height:30px; width:60px; text-align:center; border-width:0px; font-size: 14pt;" >
+		</td>
+	</tr>
+
+	<!--1. Widerstand-->
+	<tr>
+		<td>&nbsp;</td>
+		<td>
+			<div style="width:4px; height: 40px; margin-left:28; background-color: #000000"></div>
+		</td>
+	</tr>
+	<tr>
+		<td align=right><FONT face=arial SIZE="+1"><b>R1 &nbsp; &nbsp;</b></font></td>
+		<td>
+			<input name=c0 style="background: #eeeeee; height:120px; width:60px; text-align:center; border-style: solid; border-color:black; border-width:3px; font-size: 12pt;" >
+		</td>
+	</tr>
+
+	<!--Abzweigung-->
+	<tr>
+		<td>&nbsp;</td>
+		<td>
+			<div style="width:4px; height: 60px; margin-left:28; background-color: #000000"></div>
+			<div style="position:absolute; width:60px; height: 4px; margin-top:-32; margin-left:30; background-color: #000000"></div>
+		</td>
+		<td><FONT face=arial><b>wirkliche Ausgangsspannung:</b></font><br><input name=real_output style="background:#ffffff; width:350; border-width:0px; text-align:left; font-size:14pt;"></td>
+	</tr>
+
+	<!--2. Widerstand-->
+	<tr>
+		<td align=right><FONT face=arial SIZE="+1"><b>R2 &nbsp; &nbsp;</b></font></td>
+		<td>
+			<input name=r0 style="background: #eeeeee; height:120px; width:60px; text-align:center; border-style: solid; border-color:black; border-width:3px; font-size: 12pt;" >
+		</td>
+	</tr>
+
+	<!--Masse Zeichen-->
+	<tr>
+		<td>&nbsp;</td>
+		<td>
+			<div style="width:4px; height: 40px; margin-left:28; background-color: #000000"></div>
+			<div style="width:40px; height: 5px; margin-top:0; margin-left:10; background-color: #000000"></div>
+		</td>
+	</tr>
+	</TABLE></TD></TR></TABLE>
+	</FORM>
+	<br>
+
+	<!--Fuﬂnote-->
+	<FONT SIZE="+2"> Hinweis:  </FONT><br>
+	<FONT SIZE="+1">- Das Dezimaltrennzeichen wird als Punkt '.'  angezeigt.</FONT><br>
+	<FONT SIZE="+1">- Der Spannsungsteiler ist als unbelastet zu betrachten (I_out = 0A)  </FONT><br>
+	</BODY>
+</HTML>
